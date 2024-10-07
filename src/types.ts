@@ -1,4 +1,11 @@
-export interface SimbriefData {
+import { availableCompanies } from "./config";
+
+export type Preferences = {
+	pilotId: string;
+	company: keyof typeof availableCompanies;
+};
+
+export interface SimBriefData {
 	fetch: Fetch;
 	params: Params;
 	general: General;

@@ -1177,13 +1177,14 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 									<>
 										<tr>
 											<td>-{data.navlog.fix[i + 1].fir}</td>
-											<td colSpan={3}>
+											<td colSpan={4}>
 												{convertLatLonToDegreesMinutes(
 													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_lat_entry,
 													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_long_entry
 												)}
 											</td>
-											<td className="jst_text-center" colSpan={5}>
+											<td width={100} colSpan={4} style={{ whiteSpace: "nowrap !important" }}>
+												{"	  "}
 												{data.navlog.fix[i + 1]!.fir_crossing!.fir!.fir_name.replace("FIR", "")}
 											</td>
 											<td colSpan={2} className="jst_text-right">

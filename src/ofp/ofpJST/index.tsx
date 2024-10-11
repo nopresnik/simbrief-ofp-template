@@ -1111,6 +1111,7 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 							<td className="jst_text-right">ZT</td>
 							<td> ETA</td>
 							<td> FL</td>
+							<td> </td>
 							<td> WIND / COMP</td>
 							<td> ISA</td>
 							<td colSpan={4}> TAS</td>
@@ -1118,7 +1119,7 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 						<tr>
 							<td colSpan={2}>TO/</td>
 							<td className="jst_text-right">ACTM</td>
-							<td colSpan={3}> ATA</td>
+							<td colSpan={4}> ATA</td>
 							<td> DEV</td>
 							<td> GS</td>
 							<td> ACBO</td>
@@ -1127,7 +1128,7 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 						</tr>
 						<tr>
 							<td>AWY</td>
-							<td colSpan={10}>/ MORA</td>
+							<td colSpan={11}>/ MORA</td>
 						</tr>
 						<br />
 						<tr>
@@ -1144,6 +1145,7 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 									<td className="jst_text-right"> {Math.round(Number(nav.time_leg) / 60)}</td>
 									<td> ....</td>
 									<td> {nav.stage === "CRZ" ? Number(nav.altitude_feet) / 100 : parseStageName(nav.stage)}</td>
+									<td> </td>
 									<td>
 										{" "}
 										{nav.wind_dir.padStart(3, "0")}/{nav.wind_spd.padStart(3, "0")}
@@ -1154,12 +1156,14 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 									<td> {nav.true_airspeed.padStart(3, "0")}</td>
 									<td> .....</td>
 									<td> ....</td>
+									<td></td>
 								</tr>
 								<tr>
 									<td colSpan={2}>{nav.ident}</td>
 									<td className="jst_text-right">{DateTools.toHoursMinutes(nav.time_total)}</td>
 									<td> ....</td>
 									<td> ...</td>
+									<td> </td>
 									<td colSpan={2}> .............</td>
 									<td> {nav.groundspeed}</td>
 									<td> {nav.fuel_totalused.padStart(5, "0")}</td>
@@ -1168,23 +1172,25 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 								</tr>
 								<tr>
 									<td>{nav.via_airway}</td>
-									<td>/ {nav.mora}</td>
+									<td colSpan={11}>/ {nav.mora}</td>
 								</tr>
 								<tr>
-									<td colSpan={11}> </td>
+									<td colSpan={12}> </td>
 								</tr>
 								{data.navlog.fix[i + 1]?.fir_crossing?.fir && (
 									<>
 										<tr>
 											<td>-{data.navlog.fix[i + 1].fir}</td>
 											<td colSpan={4}>
+												{" "}
+												-{"  "}
 												{convertLatLonToDegreesMinutes(
 													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_lat_entry,
 													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_long_entry
 												)}
 											</td>
-											<td width={100} colSpan={4} style={{ whiteSpace: "nowrap !important" }}>
-												{"	  "}
+											<td width={100} colSpan={5} style={{ whiteSpace: "nowrap !important" }}>
+												{"	   "}
 												{data.navlog.fix[i + 1]!.fir_crossing!.fir!.fir_name.replace("FIR", "")}
 											</td>
 											<td colSpan={2} className="jst_text-right">

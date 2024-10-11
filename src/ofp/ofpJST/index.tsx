@@ -80,12 +80,12 @@ const numberToSignPrefixed = (wind: string | number, leadingZeros: number = 0) =
 	return "0".padStart(leadingZeros, "0");
 };
 
-const convertToArray = (data: unknown) => {
+const convertToArray = (data: object | object[]) => {
 	if (Array.isArray(data)) {
 		return data;
 	}
 
-	if (data) {
+	if (Object.keys(data).length > 0) {
 		return [data];
 	}
 
@@ -180,6 +180,7 @@ class JstFuelSummary {
 				this.getContingencyFuel().fuel +
 				this.getWxPlusTfcFuel().fuel +
 				this.getFixedReserveFuel().fuel +
+				this.getExtraFuel().fuel +
 				this.getTankerFuel().fuel +
 				this.getTaxiFuel().fuel,
 		};
@@ -1013,53 +1014,57 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 					<br />
 					<div>XXXXXXXXXXXXXXXXXXXX ALTERNATE SUMMARIES XXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
 					<br />
-					<div>FUEL INCLUDES MISSED APPROACH ALLOWANCE</div>
-					<br />
-					<table className="jst_table_alternate_summary">
-						<tr>
-							<td width={200}></td>
-							<td></td>
-							<td> MORA</td>
-							<td> TTK</td>
-							<td> DIST</td>
-							<td> FL</td>
-							<td> TIME</td>
-							<td> ETA</td>
-							<td>BURN</td>
-							<td>RWY</td>
-						</tr>
-						{alternates.map((alt, i) => (
-							<React.Fragment key={i}>
+					{alternates.length > 0 ? (
+						<>
+							<div>FUEL INCLUDES MISSED APPROACH ALLOWANCE</div>
+							<br />
+							<table className="jst_table_alternate_summary">
 								<tr>
-									<td>LDG ALTERNATE -</td>
-									<td> {alt.iata_code}</td>
-									<td>XXX</td>
-									<td>{alt.track_true}</td>
-									<td>{alt.air_distance.padStart(4, "0")}</td>
-									<td>{Number(alt.cruise_altitude) / 100}</td>
-									<td>{DateTools.toHoursMinutes(alt.ete, ":")}</td>
-									<td>
-										{new DateTools(data.times.sched_out)
-											.addTime(Number(data.times.est_time_enroute))
-											.addTime(Number(alt.ete))
-											.addTime(600)
-											.getUtcTimeString()}
-									</td>
-									<td>{alt.burn}</td>
-									<td>{alt.plan_rwy}</td>
+									<td width={200}></td>
+									<td></td>
+									<td> MORA</td>
+									<td> TTK</td>
+									<td> DIST</td>
+									<td> FL</td>
+									<td> TIME</td>
+									<td> ETA</td>
+									<td>BURN</td>
+									<td>RWY</td>
 								</tr>
-								<tr>
-									<td colSpan={10}>
-										CO ROUTE {data.destination.iata_code}-{alt.iata_code}
-										{"	"} 1 {data.destination.icao_code} {alt.route} {alt.icao_code}
-									</td>
-								</tr>
-								<tr>
-									<td colSpan={10}> </td>
-								</tr>
-							</React.Fragment>
-						))}
-					</table>
+								{alternates.map((alt, i) => (
+									<React.Fragment key={i}>
+										<tr>
+											<td>LDG ALTERNATE -</td>
+											<td> {alt.iata_code}</td>
+											<td>XXX</td>
+											<td>{alt.track_true}</td>
+											<td>{alt.air_distance.padStart(4, "0")}</td>
+											<td>{Number(alt.cruise_altitude) / 100}</td>
+											<td>{DateTools.toHoursMinutes(alt.ete, ":")}</td>
+											<td>
+												{new DateTools(data.times.sched_out)
+													.addTime(Number(data.times.est_time_enroute))
+													.addTime(Number(alt.ete))
+													.addTime(600)
+													.getUtcTimeString()}
+											</td>
+											<td>{alt.burn}</td>
+											<td>{alt.plan_rwy}</td>
+										</tr>
+										<tr>
+											<td colSpan={10}>
+												CO ROUTE {data.destination.iata_code}-{alt.iata_code}
+												{"	"} 1 {data.destination.icao_code} {alt.route} {alt.icao_code}
+											</td>
+										</tr>
+										<tr>
+											<td colSpan={10}> </td>
+										</tr>
+									</React.Fragment>
+								))}
+							</table>
+						</>
+					) : <><div>NO ALTERNATES PLANNED</div><br /></>}
 					<br />
 					<div>XXXXXXXXXXXXXXXX CRITICAL FUEL SUMMARIES XXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
 					<br />

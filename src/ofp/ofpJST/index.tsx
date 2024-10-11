@@ -111,8 +111,6 @@ class JstFuelSummary {
 
 		// If alternate is an array, get the first one.
 		return { time: Number(this.data.alternate[0]?.ete ?? 0), fuel: Number(this.data.fuel.alternate_burn) };
-
-		// return { time: Number(this.data.alternate?.ete ?? 0), fuel: Number(this.data.fuel.alternate_burn) };
 	}
 
 	public getContingencyFuel() {
@@ -193,10 +191,37 @@ class JstFuelSummary {
 	}
 }
 
+const parseStageName = (stage: string) => {
+	if (stage === "DSC") {
+		return "DES";
+	}
+
+	return stage;
+};
+
+const convertLatLonToDegreesMinutes = (lat: string | number, lon: string | number) => {
+	lat = Number(lat);
+	lon = Number(lon);
+
+	const latDirection = lat >= 0 ? "N" : "S";
+	lat = Math.abs(lat);
+	const latDegrees = Math.floor(lat);
+	const latMinutes = (lat - latDegrees) * 60;
+
+	const lonDirection = lon >= 0 ? "E" : "W";
+	lon = Math.abs(lon);
+	const lonDegrees = Math.floor(lon);
+	const lonMinutes = (lon - lonDegrees) * 60;
+
+	const latMinutesFormatted = latMinutes.toFixed(1);
+	const lonMinutesFormatted = lonMinutes.toFixed(1);
+
+	return `${latDirection}${latDegrees} ${latMinutesFormatted} ${lonDirection}${lonDegrees} ${lonMinutesFormatted}`;
+};
+
 export const OfpJST = ({ data }: { data: SimBriefData }) => {
 	const fuelCalcs = React.useMemo(() => new JstFuelSummary(data), [data]);
 	const alternates = convertToArray(data.alternate);
-	const alternate_navlog = convertToArray(data.alternate_navlog);
 
 	const PAGE_HEADER = (
 		<div className="jst_page_header">
@@ -793,9 +818,6 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 					<div>{"                        "}JETSTAR FLIGHT PLAN</div>
 					<div>XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
 					<br />
-					<br />
-					<br />
-					<br />
 					<table className="jst_table_collapsed">
 						<tr>
 							<td>FROM/TO{"		"}</td>
@@ -1064,7 +1086,12 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 								))}
 							</table>
 						</>
-					) : <><div>NO ALTERNATES PLANNED</div><br /></>}
+					) : (
+						<>
+							<div>NO ALTERNATES PLANNED</div>
+							<br />
+						</>
+					)}
 					<br />
 					<div>XXXXXXXXXXXXXXXX CRITICAL FUEL SUMMARIES XXXXXXXXXXXXXXXXXXXXXXXXXXXX</div>
 					<br />
@@ -1076,9 +1103,102 @@ export const OfpJST = ({ data }: { data: SimBriefData }) => {
 					<div>
 						CO ROUTE {data.origin.iata_code}-{data.destination.iata_code}-1
 					</div>
-					<div>
-						DIST{"	"}MC{"	"}ZT{"	"}ETA{"	"}FL{"	"}WIND / COMP{"	"}ISA{"	"}TAS
-					</div>
+					<br />
+					<table>
+						<tr>
+							<td>DIST</td>
+							<td>MC</td>
+							<td className="jst_text-right">ZT</td>
+							<td> ETA</td>
+							<td> FL</td>
+							<td> WIND / COMP</td>
+							<td> ISA</td>
+							<td colSpan={4}> TAS</td>
+						</tr>
+						<tr>
+							<td colSpan={2}>TO/</td>
+							<td className="jst_text-right">ACTM</td>
+							<td colSpan={3}> ATA</td>
+							<td> DEV</td>
+							<td> GS</td>
+							<td> ACBO</td>
+							<td> FUELRM</td>
+							<td> SR</td>
+						</tr>
+						<tr>
+							<td>AWY</td>
+							<td colSpan={10}>/ MORA</td>
+						</tr>
+						<br />
+						<tr>
+							<td colSpan={3}>{data.origin.icao_code}</td>
+							<td> ....</td>
+							<td colSpan={7}> SET HDG TIME</td>
+						</tr>
+						<br />
+						{data.navlog.fix.map((nav, i) => (
+							<React.Fragment key={nav.ident}>
+								<tr>
+									<td>{nav.distance.padStart(3, "0")}</td>
+									<td>{nav.track_mag.padStart(3, "0")}</td>
+									<td className="jst_text-right"> {Math.round(Number(nav.time_leg) / 60)}</td>
+									<td> ....</td>
+									<td> {nav.stage === "CRZ" ? Number(nav.altitude_feet) / 100 : parseStageName(nav.stage)}</td>
+									<td>
+										{" "}
+										{nav.wind_dir.padStart(3, "0")}/{nav.wind_spd.padStart(3, "0")}
+										{"  "}
+										{numberToSignPrefixed(data.general.avg_wind_comp, 3)}
+									</td>
+									<td> {nav.stage === "CRZ" ? numberToSignPrefixed(nav.oat_isa_dev, 2) : parseStageName(nav.stage)}</td>
+									<td> {nav.true_airspeed.padStart(3, "0")}</td>
+									<td> .....</td>
+									<td> ....</td>
+								</tr>
+								<tr>
+									<td colSpan={2}>{nav.ident}</td>
+									<td className="jst_text-right">{DateTools.toHoursMinutes(nav.time_total)}</td>
+									<td> ....</td>
+									<td> ...</td>
+									<td colSpan={2}> .............</td>
+									<td> {nav.groundspeed}</td>
+									<td> {nav.fuel_totalused.padStart(5, "0")}</td>
+									<td> {(Number(nav.fuel_plan_onboard) / 1000).toFixed(1).padStart(4, " ")}</td>
+									<td> XX{/* NOT SURE WHAT "SR" IS*/}</td>
+								</tr>
+								<tr>
+									<td>{nav.via_airway}</td>
+									<td>/ {nav.mora}</td>
+								</tr>
+								<tr>
+									<td colSpan={11}> </td>
+								</tr>
+								{data.navlog.fix[i + 1]?.fir_crossing?.fir && (
+									<>
+										<tr>
+											<td>-{data.navlog.fix[i + 1].fir}</td>
+											<td colSpan={3}>
+												{convertLatLonToDegreesMinutes(
+													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_lat_entry,
+													data.navlog.fix[i + 1]!.fir_crossing!.fir!.pos_long_entry
+												)}
+											</td>
+											<td className="jst_text-center" colSpan={5}>
+												{data.navlog.fix[i + 1]!.fir_crossing!.fir!.fir_name.replace("FIR", "")}
+											</td>
+											<td colSpan={2} className="jst_text-right">
+												--------
+											</td>
+										</tr>
+
+										<tr>
+											<td colSpan={11}> </td>
+										</tr>
+									</>
+								)}
+							</React.Fragment>
+						))}
+					</table>
 				</div>
 			</div>
 		</div>

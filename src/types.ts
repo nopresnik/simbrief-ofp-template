@@ -11,7 +11,7 @@ export interface SimBriefData {
 	general: General;
 	origin: Origin;
 	destination: Destination;
-	alternate: Alternate;
+	alternate: Alternate | Alternate[];
 	alternate_navlog: Navlog;
 	takeoff_altn: EnrouteAltn;
 	enroute_altn: EnrouteAltn;
@@ -53,7 +53,7 @@ export interface Aircraft {
 	iata_code: string;
 	name: string;
 	reg: string;
-	fin: EnrouteAltn;
+	fin: string;
 	selcal: string;
 	equip: string;
 	fuelfact: string;

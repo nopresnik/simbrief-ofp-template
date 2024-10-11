@@ -35,27 +35,14 @@ export const App = () => {
 				<form onSubmit={handleSubmit}>
 					<div>
 						<label htmlFor="pilotid">SimBrief Pilot ID: </label>
-						<input
-							required
-							type="text"
-							id="pilotid"
-							name="pilotId"
-							onChange={handleChange}
-						/>
+						<input required type="text" id="pilotid" name="pilotId" onChange={handleChange} />
 					</div>
 
 					<div>
 						<label>Company: </label>
 						{Object.entries(availableCompanies).map(([value, name]) => (
 							<React.Fragment key={value}>
-								<input
-									required
-									type="radio"
-									name="company"
-									value={value}
-									id={value}
-									onChange={handleChange}
-								/>
+								<input required type="radio" name="company" value={value} id={value} onChange={handleChange} />
 								<label htmlFor={value}>{name}</label>
 							</React.Fragment>
 						))}
@@ -70,10 +57,9 @@ export const App = () => {
 			</fieldset>
 
 			{currentOfp && preferences?.company && (
-				<fieldset>
-					<legend>Result</legend>
+				<div style={{ background: "#1e1e1e", padding: 32, width: "fit-content", marginTop: 8 }}>
 					<OfpFactory companyCode={preferences.company} data={currentOfp} />
-				</fieldset>
+				</div>
 			)}
 		</>
 	);
